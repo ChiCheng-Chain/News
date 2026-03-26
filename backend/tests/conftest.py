@@ -15,8 +15,11 @@ def test_engine():
 
 @pytest.fixture
 def db_session(test_engine):
-    Session = sessionmaker(bind=test_engine)
+    connection = test_engine.connect()
+    transaction = connection.begin()
+    Session = sessionmaker(bind=connection)
     session = Session()
     yield session
-    session.rollback()
     session.close()
+    transaction.rollback()
+    connection.close()

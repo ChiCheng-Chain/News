@@ -1,7 +1,7 @@
 import pytest
 from datetime import date, datetime
 from sqlalchemy.exc import IntegrityError
-from app.models import Article, Topic, Digest, Source, PipelineRun
+from app.models import Article, Topic, Digest, Source, PipelineRun, ArticleTopic
 
 def test_article_create(db_session):
     article = Article(
@@ -11,7 +11,7 @@ def test_article_create(db_session):
     db_session.add(article)
     db_session.commit()
     assert article.id is not None
-    assert article.is_duplicate == False
+    assert article.is_duplicate is False
 
 def test_digest_date_unique(db_session):
     d1 = Digest(date=date(2025, 3, 8), content="test", triggered_by="manual")
@@ -23,7 +23,7 @@ def test_source_create(db_session):
     s = Source(name="BBC", type="rss", url="http://feeds.bbci.co.uk/news/rss.xml", language="en")
     db_session.add(s)
     db_session.commit()
-    assert s.enabled == True
+    assert s.enabled is True
 
 def test_pipeline_run_create(db_session):
     run = PipelineRun(date=date.today(), status="running", current_step="collect")
@@ -33,8 +33,6 @@ def test_pipeline_run_create(db_session):
 
 def test_digest_date_unique_constraint(db_session):
     """同一日期不能有两条digest记录"""
-    from datetime import date
-    from app.models import Digest
     d1 = Digest(date=date(2025, 6, 1), content="first", triggered_by="manual")
     db_session.add(d1)
     db_session.commit()
@@ -47,8 +45,6 @@ def test_digest_date_unique_constraint(db_session):
 
 def test_topic_create(db_session):
     """Topic模型CRUD正常"""
-    from datetime import date
-    from app.models import Topic
     t = Topic(
         title="测试话题",
         summary="这是摘要",
@@ -59,13 +55,10 @@ def test_topic_create(db_session):
     db_session.add(t)
     db_session.commit()
     assert t.id is not None
-    assert t.is_blind_spot == True
+    assert t.is_blind_spot is True
 
 def test_article_topic_create(db_session):
     """ArticleTopic关联表CRUD正常"""
-    from datetime import date
-    from app.models import Article, Topic, ArticleTopic
-
     article = Article(source="CNN", title="Test", content="...", url="http://x.com", language="en", date=date.today())
     topic = Topic(title="Topic", summary="sum", perspectives=[], is_blind_spot=False, date=date.today())
     db_session.add_all([article, topic])
